@@ -1,0 +1,7 @@
+refactor(landing): drop the "Chinese docs" wording from the page
+
+The header brand keeps only the official mark and the Beta tag. The bottom
+docs section is retitled "Every detail is written down.", and the footer
+blurb and copyright line no longer describe the site as Chinese docs. The
+hero button and mobile menu now read "Read the docs" / "Docs" consistently,
+and the .k-brand-cn styles that became dead are removed.
