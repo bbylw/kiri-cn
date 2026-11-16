@@ -1,0 +1,41 @@
+perf(landing): optimize the landing page against modern-web-guidance
+
+Hand scroll effects, rendering cost and accessibility to native browser
+features; JavaScript only fills in where support is missing.
+
+Scroll and motion
+- Move reading progress, nav shrink, reveals and parallax to scroll()/view()
+  timelines. Timelines live in their own rules so the minifier cannot fold
+  them into the `animation` shorthand, which Chrome then discards.
+- Drive the progress bar with compositor `scale` instead of per-frame width;
+  cache the scroll range with a ResizeObserver.
+- Stagger grid cards with sibling-index(); use linear() spring easing.
+- Let scroll-target-group + :target-current mark the current nav item; sync
+  aria-current two frames later, since Chromium resolves :target-current one
+  frame after scrollend.
+
+Rendering cost
+- Apply content-visibility: auto below the fold, with placeholder heights
+  calibrated to measured content boxes (within 1px of real height at all
+  three viewports, so scrolling no longer jumps).
+- Gate the simulations on both IntersectionObserver and
+  contentvisibilityautostatechange.
+
+Accessibility and typography
+- Make sections focusable; land anchors below the shrunk nav and keep the
+  focus ring inside the region.
+- Tie scrollbars, prefers-contrast, text-scale, text-wrap and font-size-adjust
+  to the page palette.
+- Fix .kiri p / .kiri h1 resets outranking component classes: use :where() to
+  restore 17 paragraph margins plus heading weight and tracking that were
+  silently dropped.
+- Turn the share notice into a native details disclosure, animated with
+  interpolate-size.
+- Stop clipping the engine switches and path tabs at 320px.
+
+Other
+- Preload the faces the landing page actually paints with; docs keep Inter.
+- Drop data-astro-prefetch attributes duplicating prefetchAll in astro.config.ts.
+- Reserve the scrollbar lane with overflow-y: scroll instead of
+  scrollbar-gutter: stable, which makes Chromium abort a view transition
+  whenever a section holds focus.
