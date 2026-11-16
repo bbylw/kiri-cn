@@ -1,0 +1,21 @@
+feat(landing): rebuild the home page in runkiri.com's design language
+
+The page adopts the official site's art direction: warm paper ground with
+deep mustard gold, Bricolage Grotesque headlines, container-wall texture,
+stacked hard-shadow cards and a tilted dark app window, in both light and
+dark palettes.
+
+Content moves into src/lib/landing.ts and 13 landing components, interaction
+is centralised in src/scripts/landing.ts, and every style stays inside the
+.kiri scope so docs pages are untouched.
+
+New hands-on benchmark sections: a three-engine startup race (path, slow
+motion, play, engine switches, loop, residual processes, reset), a typing and
+replayable terminal session, a Share link toggle with its visitor notice, a
+memory and sleep model (container count, per-container memory, time scale,
+idle threshold, auto demo), and a per-platform architecture switch. All
+figures reuse the measured values from this repository's docs.
+
+Animations start and stop with visibility and are torn down on
+astro:before-swap so client-side navigation never doubles a timer;
+prefers-reduced-motion renders the end state directly.
