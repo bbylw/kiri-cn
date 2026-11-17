@@ -1,14 +1,28 @@
 ---
 import Icon from "@cloudflare/nimbus-docs/components/Icon.astro";
 import Mark from "./Mark.astro";
-import { REPO_URL, RELEASES_URL } from "../../lib/landing";
+import { REPO_URL, RELEASES_URL, DOWNLOAD_URL, installTargets } from "../../lib/landing";
+import { getCollection } from "astro:content";
 
 const base = import.meta.env.BASE_URL.replace(/\/$/, "");
 const href = (path: string) => `${base}${path}`;
 
-const columns = [
+// The count is read from the collection, so the footer never drifts from the docs.
+const docCount = (await getCollection("docs")).length;
+const year = new Date().getFullYear();
+
+interface BayLink {
+  label: string;
+  href: string;
+  external?: boolean;
+  mono?: boolean;
+}
+
+const bays: { code: string; title: string; tone: string; links: BayLink[] }[] = [
   {
+    code: "B-01",
     title: "文档",
+    tone: "ember",
     links: [
       { label: "什么是 Kiri", href: href("/intro/") },
       { label: "快速开始", href: href("/quick-start/") },
@@ -18,7 +32,9 @@ const columns = [
     ],
   },
   {
+    code: "B-02",
     title: "能力",
+    tone: "teal",
     links: [
       { label: "容器与 Compose", href: href("/docker/containers/") },
       { label: "Kubernetes", href: href("/guide/kubernetes/") },
@@ -28,7 +44,9 @@ const columns = [
     ],
   },
   {
+    code: "B-03",
     title: "项目",
+    tone: "rose",
     links: [
       { label: "官方站点", href: "https://runkiri.com/", external: true },
       { label: "英文文档", href: "https://docs.runkiri.com/", external: true },
@@ -37,64 +55,213 @@ const columns = [
       { label: "基准测试", href: href("/guide/benchmarks/") },
     ],
   },
+  {
+    code: "B-04",
+    title: "给 agent 读",
+    tone: "azure",
+    links: [
+      { label: "llms.txt", href: href("/llms.txt"), mono: true, external: true },
+      { label: "llms-full.txt", href: href("/llms-full.txt"), mono: true, external: true },
+      { label: "站点地图", href: href("/sitemap-index.xml"), external: true },
+      { label: "robots.txt", href: href("/robots.txt"), mono: true, external: true },
+      { label: "本页 Markdown", href: href("/intro/index.md"), mono: true, external: true },
+    ],
+  },
 ];
+
+const first = installTargets[0];
+const feedCmd = `curl -fsSL ${new URL(href("/llms-full.txt"), Astro.site).href}`;
 ---
 
-<footer class="k-footer k-defer">
-  <svg class="k-skyline" viewBox="0 0 1200 96" preserveAspectRatio="none" aria-hidden="true" fill="none">
-    <g stroke="currentColor" stroke-width="2">
-      <path d="M0 78h1200" />
-      <path d="M120 78V40h58v38M178 52h44v26M262 78V56h38v22" />
-      <path d="M420 78V28h10v50M430 34h96M526 34v14M478 34v18h22v-18" />
-      <path d="M640 78V52h52v26M692 62h40v16M760 78V44h46v34" />
-      <path d="M900 78V30h9v48M909 36h84M993 36v12M950 36v16h20v-16" />
-      <path d="M1040 78V58h44v20M1084 66h40v12" />
-    </g>
-    <g fill="currentColor" opacity=".45">
-      <rect x="126" y="60" width="20" height="8" rx="1.5" />
-      <rect x="150" y="60" width="20" height="8" rx="1.5" />
-      <rect x="268" y="64" width="24" height="8" rx="1.5" />
-      <rect x="646" y="60" width="22" height="8" rx="1.5" />
-      <rect x="766" y="54" width="22" height="8" rx="1.5" />
-      <rect x="1046" y="66" width="22" height="8" rx="1.5" />
-    </g>
-    <path d="M0 86h1200" stroke="currentColor" stroke-width="1" stroke-dasharray="10 8" opacity=".7" />
-  </svg>
+<footer class="k-footer k-defer" data-k-yard>
+  {/* the gantry edge: two layers that drift at different rates as the yard arrives */}
+  <div class="k-yard-edge" aria-hidden="true">
+    <svg class="k-yard-far" viewBox="0 0 1200 132" preserveAspectRatio="none" fill="none">
+      <g stroke="currentColor" stroke-width="1.6" stroke-linecap="square">
+        <path d="M148 118V38h9v80M157 44h132M289 44v13M228 44v20h26V44" />
+        <path d="M150 38l-34 22M157 44l52-16" />
+        <path d="M612 118V30h9v88M621 36h140M761 36v13M696 36v22h28V36" />
+        <path d="M614 30l-36 24M621 36l56-18" />
+        <path d="M1004 118V46h8v72M1012 52h118M1130 52v11M1074 52v18h24V52" />
+        <path d="M1006 46l-30 20M1012 52l46-14" />
+      </g>
+    </svg>
+    <svg class="k-yard-near" viewBox="0 0 1200 132" preserveAspectRatio="none" fill="none">
+      <g stroke="currentColor" stroke-width="2" stroke-linecap="square">
+        <path d="M0 118h1200" />
+        <path d="M60 118V80h74v38M134 94h48v24M330 118V64h60v54M390 82h44v36" />
+        <path d="M470 118V88h70v30M540 100h40v18" />
+        <path d="M820 118V70h64v48M884 88h46v30M948 118V96h40v22" />
+        <path d="M1140 118V84h52v34" />
+      </g>
+      <g fill="currentColor" opacity=".5">
+        <rect x="66" y="98" width="26" height="9" rx="1.5" />
+        <rect x="98" y="98" width="26" height="9" rx="1.5" />
+        <rect x="140" y="104" width="28" height="9" rx="1.5" />
+        <rect x="336" y="82" width="24" height="9" rx="1.5" />
+        <rect x="364" y="82" width="24" height="9" rx="1.5" />
+        <rect x="336" y="98" width="52" height="9" rx="1.5" />
+        <rect x="476" y="102" width="26" height="9" rx="1.5" />
+        <rect x="508" y="102" width="26" height="9" rx="1.5" />
+        <rect x="826" y="88" width="24" height="9" rx="1.5" />
+        <rect x="854" y="88" width="24" height="9" rx="1.5" />
+        <rect x="826" y="102" width="52" height="9" rx="1.5" />
+        <rect x="1146" y="100" width="26" height="9" rx="1.5" />
+      </g>
+      <path d="M0 127h1200" stroke="currentColor" stroke-width="1" stroke-dasharray="11 9" opacity=".65" />
+    </svg>
+    <span class="k-yard-trolley"><i></i></span>
+  </div>
 
-  <div class="k-wrap">
-    <div class="k-foot-grid">
-      <div>
-        <a href={href("/")} class="k-foot-brand">
+  <div class="k-wrap k-yard-wrap">
+    <div class="k-yard-strip" data-reveal>
+      <span class="k-yard-stencil">Kiri Yard · 堆场清单</span>
+      <ul class="k-yard-chips" role="list">
+        <li><Icon name="ph:file-rs" class="h-3.5 w-3.5" aria-hidden="true" />Rust</li>
+        <li><Icon name="ph:scales" class="h-3.5 w-3.5" aria-hidden="true" />Apache-2.0 / MIT</li>
+        <li><Icon name="ph:books" class="h-3.5 w-3.5" aria-hidden="true" />{docCount} 篇文档</li>
+        <li><Icon name="ph:desktop-tower" class="h-3.5 w-3.5" aria-hidden="true" />macOS · Windows · Linux</li>
+      </ul>
+    </div>
+
+    <div class="k-yard-grid">
+      <div class="k-yard-brand" data-reveal>
+        <a href={href("/")} class="k-foot-brand" aria-label="Kiri 首页">
           <Mark class="k-logo k-foot-logo" />
         </a>
         <p class="k-foot-tag">
           一个小巧、快速的容器运行时，适用于 Mac、Windows 与 Linux。用 Rust 编写，一条守护进程直连内核。
         </p>
-      </div>
-      {
-        columns.map((c) => (
-          <div>
-            <p class="k-foot-h">{c.title}</p>
-            <ul class="k-foot-list" role="list">
-              {c.links.map((l) => (
-                <li>
-                  <a href={l.href} {...l.external ? { target: "_blank", rel: "noopener" } : {}}>
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </ul>
+
+        <div class="k-install" data-k-install>
+          <div class="k-install-top">
+            <span class="k-install-k">带走它</span>
+            <div class="k-seg k-install-seg" role="tablist" aria-label="选择安装平台">
+              {
+                installTargets.map((t, i) => (
+                  <button
+                    type="button"
+                    class:list={["k-seg-b", i === 0 && "is-on"]}
+                    role="tab"
+                    id={`k-inst-tab-${t.id}`}
+                    aria-selected={i === 0 ? "true" : "false"}
+                    aria-controls="k-inst-panel"
+                    data-k-install-tab={t.id}
+                  >
+                    <Icon name={t.icon} class="h-4 w-4" aria-hidden="true" />
+                    {t.name}
+                  </button>
+                ))
+              }
+            </div>
           </div>
-        ))
-      }
+          <div
+            class="k-install-body"
+            role="tabpanel"
+            id="k-inst-panel"
+            aria-labelledby={`k-inst-tab-${first.id}`}
+            tabindex="0"
+          >
+            <span class="k-install-label" data-k-install-label>{first.label}</span>
+            <div class="k-cmd k-install-cmd">
+              <code data-k-install-cmd>{first.cmd}</code>
+              <button
+                type="button"
+                class="k-copy"
+                data-copy={first.cmd}
+                data-k-install-copy
+                aria-label="复制命令"
+              >
+                <Icon name="ph:copy" class="h-3.5 w-3.5" aria-hidden="true" />
+              </button>
+            </div>
+            <p class="k-install-note" data-k-install-note>{first.note}</p>
+            <div class="k-install-foot">
+              <a href={DOWNLOAD_URL} target="_blank" rel="noopener" class="k-btn k-btn-sm">
+                <Icon name="ph:download-simple" class="h-4 w-4" aria-hidden="true" />
+                下载安装包
+              </a>
+              <span class="k-install-pkg" data-k-install-pkg>{first.pkg}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="k-yard-links">
+        <nav class="k-bays" aria-label="站点导航">
+        {
+          bays.map((b) => (
+            <div class:list={["k-bay", `is-${b.tone}`]} data-reveal>
+              <p class="k-bay-h">
+                <span class="k-bay-code">{b.code}</span>
+                {b.title}
+              </p>
+              <ul class="k-foot-list" role="list">
+                {b.links.map((l) => (
+                  <li>
+                    <a
+                      href={l.href}
+                      {...l.external ? { target: "_blank", rel: "noopener" } : {}}
+                    >
+                      <span class:list={[l.mono && "is-mono"]}>{l.label}</span>
+                      <Icon
+                        name={l.external ? "ph:arrow-up-right" : "ph:arrow-right"}
+                        class="k-foot-arrow h-3.5 w-3.5"
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        }
+        </nav>
+
+        <div class="k-feed" data-reveal>
+          <p class="k-feed-h">
+            <Icon name="ph:robot" class="h-4 w-4" aria-hidden="true" />
+            一次喂给 agent
+            <span class="k-feed-code">MANIFEST</span>
+          </p>
+          <p class="k-feed-p">
+            <code>llms-full.txt</code> 把 {docCount} 篇文档合成一份纯文本，不用爬站；任意文档路径后接
+            <code>index.md</code> 就是那一页的原始 Markdown。
+          </p>
+          <div class="k-cmd k-feed-cmd">
+            <code>{feedCmd}</code>
+            <button type="button" class="k-copy" data-copy={feedCmd} aria-label="复制命令">
+              <Icon name="ph:copy" class="h-3.5 w-3.5" aria-hidden="true" />
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
-    <a href="#top" class="k-foot-top">
-      <Icon name="ph:arrow-up" class="h-3.5 w-3.5" aria-hidden="true" />
-      回到顶部
-    </a>
-    <p class="k-legal">
-      © 2026 Kiri contributors。Kiri 以 Apache-2.0 / MIT 双许可开源（以仓库声明为准）；名称与标志不在许可覆盖范围内。
-      Docker 是 Docker, Inc. 的商标，OrbStack 等名称属于各自所有者，此处仅用于描述测量结果。本站基于 Nimbus 与 Astro 构建。
-    </p>
+
+    <div class="k-quay" data-reveal>
+      <a href="#top" class="k-quay-lift">
+        <span class="k-quay-ico">
+          <Icon name="ph:arrow-up" class="h-4 w-4" aria-hidden="true" />
+        </span>
+        回到堆场顶部
+      </a>
+      <div class="k-quay-read">
+        <span class="k-quay-read-k">已读</span>
+        <span class="k-quay-bar"><i data-k-quay-fill></i></span>
+        <b data-k-quay-pct>0%</b>
+      </div>
+    </div>
+
+    <div class="k-legal">
+      <div class="k-legal-marks">
+        <span class="k-legal-chip">Apache-2.0</span>
+        <span class="k-legal-chip">MIT</span>
+        <span class="k-legal-code">© {year} Kiri contributors</span>
+      </div>
+      <p>
+        双许可开源，以仓库声明为准；名称与标志不在许可覆盖范围内。Docker 是 Docker, Inc. 的商标，OrbStack
+        等名称属于各自所有者，此处仅用于描述测量结果。本站基于 Nimbus 与 Astro 构建。
+      </p>
+    </div>
   </div>
 </footer>

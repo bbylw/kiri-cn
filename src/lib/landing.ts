@@ -332,3 +332,47 @@ export const navLinks = [
   { href: "#how", label: "原理" },
   { href: "#start", label: "上手" },
 ];
+/**
+ * The footer's install manifest. Commands and package formats are the ones
+ * documented in src/content/docs/install.mdx — Windows has no shell installer,
+ * so its line is the check you run once the .msi has finished.
+ */
+export interface InstallTarget {
+  id: PlatformId;
+  name: string;
+  icon: string;
+  label: string;
+  cmd: string;
+  pkg: string;
+  note: string;
+}
+
+export const installTargets: InstallTarget[] = [
+  {
+    id: "mac",
+    name: "macOS",
+    icon: "ph:apple-logo",
+    label: "安装脚本",
+    cmd: "curl -fsSL https://runkiri.com/install.sh | bash",
+    pkg: ".dmg · macOS 14+ · Apple silicon / Intel",
+    note: "脚本会校验下载内容再安装。也可以直接下载 .dmg，把 Kiri 拖进「应用程序」。",
+  },
+  {
+    id: "win",
+    name: "Windows",
+    icon: "ph:windows-logo",
+    label: "装好后验证",
+    cmd: "docker --context kiri run --rm hello-world",
+    pkg: ".msi · Windows 10 / 11 · x64 / ARM · Beta",
+    note: "运行 .msi 安装程序，Kiri 会按需引导设置 WSL2，并配好 docker CLI 与 kiri context。",
+  },
+  {
+    id: "linux",
+    name: "Linux",
+    icon: "ph:linux-logo",
+    label: "仅装引擎",
+    cmd: "curl -fsSL https://runkiri.com/install.sh | KIRI_LITE=1 bash",
+    pkg: ".deb / .rpm · systemd · x86-64 / ARM",
+    note: "KIRI_LITE=1 只装引擎。去掉它，docker、Compose 与 buildx 会一起装好。",
+  },
+];

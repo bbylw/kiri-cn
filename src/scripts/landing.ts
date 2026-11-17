@@ -9,6 +9,7 @@ import {
   termSession,
   platforms,
   navLinks,
+  installTargets,
   type RacePath,
 } from "../lib/landing";
 
@@ -998,6 +999,90 @@ function initPlatforms(root: HTMLElement) {
   );
 }
 
+/* -------------------------------------------------------------------- yard */
+
+function initYard(root: HTMLElement) {
+  const yard = q<HTMLElement>(root, "[data-k-yard]");
+  if (!yard) return;
+
+  // install manifest: one panel, three real targets
+  const install = q<HTMLElement>(yard, "[data-k-install]");
+  if (install) {
+    const tabs = every<HTMLButtonElement>(install, "[data-k-install-tab]");
+    const panel = q<HTMLElement>(install, ".k-install-body");
+    const label = q<HTMLElement>(install, "[data-k-install-label]");
+    const cmd = q<HTMLElement>(install, "[data-k-install-cmd]");
+    const copy = q<HTMLButtonElement>(install, "[data-k-install-copy]");
+    const note = q<HTMLElement>(install, "[data-k-install-note]");
+    const pkg = q<HTMLElement>(install, "[data-k-install-pkg]");
+
+    const select = (tab: HTMLButtonElement) => {
+      const t = installTargets.find((x) => x.id === tab.dataset.kInstallTab);
+      if (!t) return;
+      tabs.forEach((b) => {
+        const on = b === tab;
+        b.classList.toggle("is-on", on);
+        b.setAttribute("aria-selected", String(on));
+        b.tabIndex = on ? 0 : -1;
+      });
+      panel?.setAttribute("aria-labelledby", tab.id);
+      if (label) label.textContent = t.label;
+      if (cmd) cmd.textContent = t.cmd;
+      // the copy handler reads data-copy at click time, so this is all it needs
+      if (copy) {
+        copy.dataset.copy = t.cmd;
+        copy.setAttribute("aria-label", `复制命令：${t.cmd}`);
+      }
+      if (note) note.textContent = t.note;
+      if (pkg) pkg.textContent = t.pkg;
+    };
+
+    tabs.forEach((tab, i) => {
+      tab.tabIndex = i === 0 ? 0 : -1;
+      listen(tab, "click", () => select(tab));
+      listen(tab, "keydown", (ev: KeyboardEvent) => {
+        const step = ev.key === "ArrowRight" ? 1 : ev.key === "ArrowLeft" ? -1 : 0;
+        if (!step) return;
+        ev.preventDefault();
+        const next = tabs[(tabs.indexOf(tab) + step + tabs.length) % tabs.length];
+        next.focus();
+        select(next);
+      });
+    });
+  }
+
+  // reading progress readout: only written while the yard is actually rendered
+  const fill = q<HTMLElement>(yard, "[data-k-quay-fill]");
+  const pct = q<HTMLElement>(yard, "[data-k-quay-pct]");
+  if (!fill || !pct) return;
+  let shown = -1;
+  const paint = () => {
+    const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+    const ratio = Math.min(1, Math.max(0, window.scrollY / max));
+    const whole = Math.round(ratio * 100);
+    if (whole === shown) return;
+    shown = whole;
+    // the bar and the readout share one precision, so 100% always reads full
+    fill.style.setProperty("--k-quay", String(whole / 100));
+    pct.textContent = `${whole}%`;
+  };
+  whileVisible(yard, paint, () => {}, { threshold: 0 });
+  let queued = false;
+  listen(
+    window,
+    "scroll",
+    () => {
+      if (queued || shown < 0) return;
+      queued = true;
+      requestAnimationFrame(() => {
+        queued = false;
+        paint();
+      });
+    },
+    { passive: true },
+  );
+}
+
 /* -------------------------------------------------------------------- boot */
 
 function init() {
@@ -1011,6 +1096,7 @@ function init() {
   initShare(root);
   initResource(root);
   initPlatforms(root);
+  initYard(root);
 }
 
 function cleanup() {
